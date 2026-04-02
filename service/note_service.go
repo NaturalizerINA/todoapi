@@ -41,6 +41,7 @@ func (s *noteServiceImpl) UpdateNote(id int, updateData models.MasterNote) (mode
 
 	note.Name = updateData.Name
 	note.Status = updateData.Status
+	note.DateUpdated = updateData.DateUpdated
 
 	err = s.repo.Update(&note)
 	return note, err

@@ -6,10 +6,18 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func SetupRoutes(app *fiber.App, noteController *controller.NoteController) {
+func SetupRoutes(
+	app *fiber.App, 
+	noteController *controller.NoteController,
+	userController *controller.UserController,
+) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
 
+	// Auth Routes
+	v1.Post("/login", userController.Login)
+
+	// Note Routes
 	v1.Post("/notes", noteController.Create)
 	v1.Get("/notes", noteController.GetAll)
 	v1.Get("/notes/:id", noteController.GetByID)

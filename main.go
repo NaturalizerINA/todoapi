@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
 	"todoapi/config"
 	"todoapi/controller"
@@ -15,6 +16,9 @@ import (
 )
 
 func main() {
+	// 0. Set local time to UTC globally
+	time.Local = time.UTC
+
 	// 0. Load .env file
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found. Proceeding with default OS environments.")
@@ -24,15 +28,21 @@ func main() {
 	config.ConnectDB()
 
 	// 2. Setup Dependency Injection (SOLID's Dependency Inversion Principle)
+	// Notes
 	noteRepo := repository.NewNoteRepository(config.DB)
 	noteService := service.NewNoteService(noteRepo)
 	noteController := controller.NewNoteController(noteService)
+
+	// Users/Auth
+	userRepo := repository.NewUserRepository(config.DB)
+	userService := service.NewUserService(userRepo)
+	userController := controller.NewUserController(userService)
 
 	// 3. Initialize Fiber App
 	app := fiber.New()
 
 	// 4. Setup Routes
-	routes.SetupRoutes(app, noteController)
+	routes.SetupRoutes(app, noteController, userController)
 
 	// 5. Start the Server
 	port := os.Getenv("APP_PORT")
