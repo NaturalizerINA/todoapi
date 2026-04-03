@@ -38,11 +38,16 @@ func main() {
 	userService := service.NewUserService(userRepo)
 	userController := controller.NewUserController(userService)
 
+	// Subtasks
+	subtaskRepo := repository.NewSubtaskRepository(config.DB)
+	subtaskService := service.NewSubtaskService(subtaskRepo)
+	subtaskController := controller.NewSubtaskController(subtaskService)
+
 	// 3. Initialize Fiber App
 	app := fiber.New()
 
 	// 4. Setup Routes
-	routes.SetupRoutes(app, noteController, userController)
+	routes.SetupRoutes(app, noteController, userController, subtaskController)
 
 	// 5. Start the Server
 	port := os.Getenv("APP_PORT")

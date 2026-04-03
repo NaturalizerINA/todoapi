@@ -65,6 +65,7 @@ type MasterNote struct {
 	Status      string     `gorm:"column:status" json:"status"`
 	DateCreated CustomTime `gorm:"column:date_created" json:"date_created"`
 	DateUpdated CustomTime `gorm:"column:date_updated" json:"date_updated"`
+	Subtasks    []Subtask  `gorm:"foreignKey:NoteID;constraint:OnDelete:CASCADE" json:"subtasks"`
 }
 
 // TableName tells GORM to use the exactly named table `master_notes`

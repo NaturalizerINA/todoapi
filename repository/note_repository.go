@@ -24,13 +24,13 @@ func NewNoteRepository(db *gorm.DB) NoteRepository {
 
 func (r *noteRepositoryImpl) FindAll() ([]models.MasterNote, error) {
 	var notes []models.MasterNote
-	result := r.db.Find(&notes)
+	result := r.db.Preload("Subtasks").Find(&notes)
 	return notes, result.Error
 }
 
 func (r *noteRepositoryImpl) FindByID(id int) (models.MasterNote, error) {
 	var note models.MasterNote
-	result := r.db.First(&note, id)
+	result := r.db.Preload("Subtasks").First(&note, id)
 	return note, result.Error
 }
 

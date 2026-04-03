@@ -10,6 +10,7 @@ func SetupRoutes(
 	app *fiber.App, 
 	noteController *controller.NoteController,
 	userController *controller.UserController,
+	subtaskController *controller.SubtaskController,
 ) {
 	api := app.Group("/api")
 	v1 := api.Group("/v1")
@@ -24,4 +25,10 @@ func SetupRoutes(
 	v1.Get("/notes/:id", noteController.GetByID)
 	v1.Put("/notes/:id", noteController.Update)
 	v1.Delete("/notes/:id", noteController.Delete)
+
+	// Subtask Routes
+	v1.Post("/subtasks", subtaskController.Create)
+	v1.Put("/subtasks/:id", subtaskController.Update)
+	v1.Delete("/subtasks/:id", subtaskController.Delete)
+	v1.Patch("/subtasks/:id/toggle", subtaskController.Toggle)
 }
