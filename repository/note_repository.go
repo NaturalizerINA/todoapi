@@ -3,12 +3,13 @@ package repository
 import (
 	"todoapi/models"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type NoteRepository interface {
-	FindAll() ([]models.MasterNote, error)
-	FindByID(id int) (models.MasterNote, error)
+	FindAll(userID uuid.UUID) ([]models.MasterNote, error)
+	FindByID(id int, userID uuid.UUID) (models.MasterNote, error)
 	Create(note *models.MasterNote) error
 	Update(note *models.MasterNote) error
 	Delete(note *models.MasterNote) error
@@ -22,15 +23,15 @@ func NewNoteRepository(db *gorm.DB) NoteRepository {
 	return &noteRepositoryImpl{db}
 }
 
-func (r *noteRepositoryImpl) FindAll() ([]models.MasterNote, error) {
+func (r *noteRepositoryImpl) FindAll(userID uuid.UUID) ([]models.MasterNote, error) {
 	var notes []models.MasterNote
-	result := r.db.Preload("Subtasks").Find(&notes)
+	result := r.db.Preload("Subtasks").Where("user_id = ?", userID).Find(&notes)
 	return notes, result.Error
 }
 
-func (r *noteRepositoryImpl) FindByID(id int) (models.MasterNote, error) {
+func (r *noteRepositoryImpl) FindByID(id int, userID uuid.UUID) (models.MasterNote, error) {
 	var note models.MasterNote
-	result := r.db.Preload("Subtasks").First(&note, id)
+	result := r.db.Preload("Subtasks").Where("id = ? AND user_id = ?", id, userID).First(&note)
 	return note, result.Error
 }
 

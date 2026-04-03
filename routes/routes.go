@@ -2,6 +2,7 @@ package routes
 
 import (
 	"todoapi/controller"
+	"todoapi/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,6 +19,9 @@ func SetupRoutes(
 	// Auth Routes
 	v1.Post("/login", userController.Login)
 	v1.Post("/register", userController.Register)
+
+	// Protected Routes
+	v1.Use(middleware.JWTMiddleware())
 
 	// Note Routes
 	v1.Post("/notes", noteController.Create)

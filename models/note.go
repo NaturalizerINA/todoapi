@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // CustomTime helps us format JSON with exactly 3 digits
@@ -61,6 +63,7 @@ func (ct *CustomTime) Scan(value interface{}) error {
 // MasterNote represents the existing master_notes table
 type MasterNote struct {
 	ID          int        `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	UserID      uuid.UUID  `gorm:"column:user_id;type:uuid" json:"user_id"`
 	Name        string     `gorm:"column:name" json:"name"`
 	Status      string     `gorm:"column:status" json:"status"`
 	DateCreated CustomTime `gorm:"column:date_created" json:"date_created"`

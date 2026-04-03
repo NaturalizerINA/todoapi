@@ -7,6 +7,7 @@ import (
 	"todoapi/service"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type NoteController struct {
@@ -18,6 +19,9 @@ func NewNoteController(service service.NoteService) *NoteController {
 }
 
 func (c *NoteController) Create(ctx *fiber.Ctx) error {
+	userIDStr := ctx.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
 	note := new(models.MasterNote)
 	if err := ctx.BodyParser(note); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
@@ -26,6 +30,7 @@ func (c *NoteController) Create(ctx *fiber.Ctx) error {
 			Data:    fiber.Map{},
 		})
 	}
+	note.UserID = userID
 
 	if err := c.service.CreateNote(note); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(models.APIResponse{
@@ -43,7 +48,10 @@ func (c *NoteController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c *NoteController) GetAll(ctx *fiber.Ctx) error {
-	notes, err := c.service.GetAllNotes()
+	userIDStr := ctx.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
+	notes, err := c.service.GetAllNotes(userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(models.APIResponse{
 			Status:  fiber.StatusInternalServerError,
@@ -60,6 +68,9 @@ func (c *NoteController) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (c *NoteController) GetByID(ctx *fiber.Ctx) error {
+	userIDStr := ctx.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
@@ -69,7 +80,7 @@ func (c *NoteController) GetByID(ctx *fiber.Ctx) error {
 		})
 	}
 
-	note, err := c.service.GetNoteByID(id)
+	note, err := c.service.GetNoteByID(id, userID)
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(models.APIResponse{
 			Status:  fiber.StatusNotFound,
@@ -86,6 +97,9 @@ func (c *NoteController) GetByID(ctx *fiber.Ctx) error {
 }
 
 func (c *NoteController) Update(ctx *fiber.Ctx) error {
+	userIDStr := ctx.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
@@ -104,7 +118,7 @@ func (c *NoteController) Update(ctx *fiber.Ctx) error {
 		})
 	}
 
-	updatedNote, err := c.service.UpdateNote(id, updateData)
+	updatedNote, err := c.service.UpdateNote(id, userID, updateData)
 	if err != nil {
 		status := fiber.StatusInternalServerError
 		if err.Error() == "record not found" {
@@ -125,6 +139,9 @@ func (c *NoteController) Update(ctx *fiber.Ctx) error {
 }
 
 func (c *NoteController) Delete(ctx *fiber.Ctx) error {
+	userIDStr := ctx.Locals("user_id").(string)
+	userID, _ := uuid.Parse(userIDStr)
+
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
@@ -134,7 +151,7 @@ func (c *NoteController) Delete(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err = c.service.DeleteNote(id)
+	err = c.service.DeleteNote(id, userID)
 	if err != nil {
 		status := fiber.StatusInternalServerError
 		if err.Error() == "record not found" {
