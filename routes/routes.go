@@ -16,6 +16,7 @@ func SetupRoutes(
 
 	// Auth Routes
 	v1.Post("/login", userController.Login)
+	v1.Post("/register", userController.Register)
 
 	// Note Routes
 	v1.Post("/notes", noteController.Create)

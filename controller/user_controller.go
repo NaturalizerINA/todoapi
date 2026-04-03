@@ -40,3 +40,28 @@ func (c *UserController) Login(ctx *fiber.Ctx) error {
 		Data:    res,
 	})
 }
+func (c *UserController) Register(ctx *fiber.Ctx) error {
+	var req models.LoginRequest
+	if err := ctx.BodyParser(&req); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
+			Status:  fiber.StatusBadRequest,
+			Message: "Invalid request payload: " + err.Error(),
+			Data:    fiber.Map{},
+		})
+	}
+
+	res, err := c.service.Register(req.Email, req.Password)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(models.APIResponse{
+			Status:  fiber.StatusBadRequest,
+			Message: err.Error(),
+			Data:    fiber.Map{},
+		})
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(models.APIResponse{
+		Status:  fiber.StatusCreated,
+		Message: "User registered successfully",
+		Data:    res,
+	})
+}

@@ -12,6 +12,7 @@ import (
 
 type UserService interface {
 	Login(email, password string) (models.LoginResponse, error)
+	Register(email, password string) (models.LoginResponse, error)
 }
 
 type userServiceImpl struct {
@@ -22,8 +23,7 @@ func NewUserService(repo repository.UserRepository) UserService {
 	return &userServiceImpl{repo}
 }
 
-// Secret key for signing (you should definitely move this to your .env file)
-const jwtSecret = "your_secret_key_change_this"
+const jwtSecret = "MyJwtSecretKey"
 
 func (s *userServiceImpl) Login(email, password string) (models.LoginResponse, error) {
 	// 1. Find user by email
@@ -59,4 +59,32 @@ func (s *userServiceImpl) Login(email, password string) (models.LoginResponse, e
 		Token: tokenString,
 		User:  user,
 	}, nil
+}
+func (s *userServiceImpl) Register(email, password string) (models.LoginResponse, error) {
+	// 1. Check if user already exists
+	_, err := s.repo.FindByEmail(email)
+	if err == nil {
+		return models.LoginResponse{}, errors.New("user already exists")
+	}
+
+	// 2. Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return models.LoginResponse{}, err
+	}
+
+	// 3. Create the user object
+	user := models.User{
+		Email:        email,
+		PasswordHash: string(hashedPassword),
+	}
+
+	// 4. Save to database
+	err = s.repo.Create(&user)
+	if err != nil {
+		return models.LoginResponse{}, err
+	}
+
+	// 5. Automatically log in after registration
+	return s.Login(email, password)
 }
